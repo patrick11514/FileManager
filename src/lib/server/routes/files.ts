@@ -45,11 +45,25 @@ export const filesRouter = {
             data
         } satisfies SuccessApiResponse<typeof data>;
     }),
-    list: authProcedure.GET.query(async () => {
-        const data = await conn
-            .selectFrom('files')
-            .selectAll()
-            .orderBy('upload_date', 'desc')
+    list: authProcedure.POST.input(
+        z.object({
+            limit: z.number().default(40),
+            offset: z.number().default(0),
+            orderBy: z.enum(['upload_date', 'original_name', 'size']).default('upload_date'),
+            orderDir: z.enum(['asc', 'desc']).default('desc'),
+            type: z.string().optional()
+        })
+    ).query(async ({ input }) => {
+        let query = conn.selectFrom('files').selectAll();
+
+        if (input.type) {
+            query = query.where('mime_type', 'like', `${input.type}%`);
+        }
+
+        const data = await query
+            .orderBy(input.orderBy, input.orderDir)
+            .limit(input.limit)
+            .offset(input.offset)
             .execute();
         return {
             status: true,
