@@ -29,6 +29,7 @@
 
     function getPageTitle(pathname: string) {
         if (pathname === '/') return 'Dashboard';
+        if (pathname === '/login') return 'Login';
         if (pathname.startsWith('/files')) return 'Files';
         if (pathname.startsWith('/images')) return 'Images';
         if (pathname.startsWith('/videos')) return 'Videos';
@@ -37,7 +38,10 @@
     }
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+    <title>{getPageTitle(page.url.pathname)} | UploaderNew</title>
+    <link rel="icon" href={favicon} />
+</svelte:head>
 
 <ModeWatcher />
 <Toaster position="top-center" />
