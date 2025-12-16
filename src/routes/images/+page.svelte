@@ -1,5 +1,6 @@
 <script lang="ts">
     import { API } from '$/lib/api';
+    import { resolve } from '$app/paths';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
@@ -10,8 +11,8 @@
 
     let { data }: { data: PageData } = $props();
 
-    let images = $state(data.images);
-    let offset = $state(data.images.length);
+    let images = $derived(data.images);
+    let offset = $derived(data.images.length);
     let loading = $state(false);
     let orderBy = $state<'upload_date' | 'original_name' | 'size'>('upload_date');
     let orderDir = $state<'asc' | 'desc'>('desc');
@@ -98,9 +99,8 @@
 
 <div class="flex h-[calc(100vh-4.1rem)] flex-col gap-4 p-4">
     <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold tracking-tight">Images</h2>
         <DropdownMenu.Root>
-            <DropdownMenu.Trigger>
+            <DropdownMenu.Trigger class="ml-auto">
                 {#snippet child({ props })}
                     <Button variant="outline" size="sm" {...props}>
                         <ArrowUpDown class="mr-2 h-4 w-4" />
@@ -148,9 +148,8 @@
                 {#each images as image (image.id)}
                     <Card.Root class="overflow-hidden transition-shadow hover:shadow-md">
                         <Card.Content class="p-0">
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
                             <a
-                                href="/image/{image.id}"
+                                href={resolve(`/image/${image.id}`)}
                                 class="relative block aspect-square bg-muted"
                             >
                                 <img

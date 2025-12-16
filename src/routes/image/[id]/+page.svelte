@@ -1,6 +1,7 @@
 <script lang="ts">
     import { API } from '$/lib/api';
     import { goto } from '$app/navigation';
+    import { resolve } from '$app/paths';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
     import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -19,8 +20,7 @@
                         toast.error(res.message);
                         return;
                     }
-                    // eslint-disable-next-line svelte/no-navigation-without-resolve
-                    await goto('/images');
+                    await goto(resolve('/images'));
                 }
             },
             cancel: {

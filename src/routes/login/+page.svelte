@@ -1,6 +1,7 @@
 <script lang="ts">
     import { API } from '$/lib/api';
     import { goto } from '$app/navigation';
+    import { resolve } from '$app/paths';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
     import { Input } from '$lib/components/ui/input/index.js';
@@ -17,8 +18,7 @@
                 error = res.message;
                 return;
             }
-            // eslint-disable-next-line svelte/no-navigation-without-resolve
-            await goto('/');
+            await goto(resolve('/'));
         } catch (e) {
             if (e instanceof Error) {
                 error = e.message;

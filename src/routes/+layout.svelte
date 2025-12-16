@@ -2,7 +2,8 @@
     import { API } from '$/lib/api';
     import favicon from '$/lib/assets/favicon.svg';
     import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
+    import { resolve } from '$app/paths';
+    import { page } from '$app/state';
     import AppSidebar from '$lib/components/app-sidebar.svelte';
     import ModeToggle from '$lib/components/mode-toggle.svelte';
     import { Button } from '$lib/components/ui/button/index.js';
@@ -23,8 +24,7 @@
 
     async function logout() {
         await API.auth.logout();
-        // eslint-disable-next-line svelte/no-navigation-without-resolve
-        await goto('/login');
+        await goto(resolve('/login'));
     }
 
     function getPageTitle(pathname: string) {
@@ -42,7 +42,7 @@
 <ModeWatcher />
 <Toaster position="top-center" />
 
-{#if data.user && $page.url.pathname !== '/login'}
+{#if data.user && page.url.pathname !== '/login'}
     <Sidebar.Provider>
         <AppSidebar user={data.user} />
         <Sidebar.Inset>
@@ -50,7 +50,7 @@
                 <Sidebar.Trigger class="-ml-1" />
                 <Separator orientation="vertical" class="mr-2 h-4" />
                 <div class="flex items-center gap-2 px-4">
-                    <h1 class="text-lg font-semibold">{getPageTitle($page.url.pathname)}</h1>
+                    <h1 class="text-lg font-semibold">{getPageTitle(page.url.pathname)}</h1>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                     <Button variant="destructive" size="icon" onclick={logout}>
