@@ -1,28 +1,70 @@
 <script lang="ts">
     import { API } from '$/lib/api';
+    import { goto } from '$app/navigation';
     import { resolve } from '$app/paths';
+    import { page } from '$app/stores';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
     import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
     import Trash2 from '@lucide/svelte/icons/trash-2';
+    import { tick } from 'svelte';
     import { toast } from 'svelte-sonner';
-    import type { PageData } from './$types';
+    import type { PageData, Snapshot } from './$types';
 
     let { data }: { data: PageData } = $props();
 
     let images = $derived(data.images);
     let offset = $derived(data.images.length);
     let loading = $state(false);
-    let orderBy = $state<'upload_date' | 'original_name' | 'size'>('upload_date');
-    let orderDir = $state<'asc' | 'desc'>('desc');
     let hasMore = $state(true);
+    let scrollContainer: HTMLDivElement | undefined = $state();
+
+    let orderBy = $derived(
+        ($page.url.searchParams.get('orderBy') as 'upload_date' | 'original_name' | 'size') ||
+            'upload_date'
+    );
+    let orderDir = $derived(($page.url.searchParams.get('orderDir') as 'asc' | 'desc') || 'desc');
+
+    let loadedOrderBy = $derived(orderBy);
+    let loadedOrderDir = $derived(orderDir);
 
     $effect(() => {
-        images = data.images;
-        offset = data.images.length;
-        hasMore = data.images.length === 40;
+        if (orderBy !== loadedOrderBy || orderDir !== loadedOrderDir) {
+            images = data.images;
+            offset = data.images.length;
+            hasMore = data.images.length === 40;
+            loadedOrderBy = orderBy;
+            loadedOrderDir = orderDir;
+        }
     });
+
+    export const snapshot: Snapshot<{
+        images: typeof images;
+        offset: number;
+        hasMore: boolean;
+        scrollTop: number;
+        loadedOrderBy: typeof loadedOrderBy;
+        loadedOrderDir: typeof loadedOrderDir;
+    }> = {
+        capture: () => ({
+            images,
+            offset,
+            hasMore,
+            scrollTop: scrollContainer?.scrollTop ?? 0,
+            loadedOrderBy,
+            loadedOrderDir
+        }),
+        restore: async (value) => {
+            images = value.images;
+            offset = value.offset;
+            hasMore = value.hasMore;
+            loadedOrderBy = value.loadedOrderBy;
+            loadedOrderDir = value.loadedOrderDir;
+            await tick();
+            if (scrollContainer) scrollContainer.scrollTop = value.scrollTop;
+        }
+    };
 
     function deleteFile(id: string) {
         toast('Are you sure you want to delete this image?', {
@@ -68,25 +110,12 @@
         loading = false;
     }
 
-    async function sort(by: 'upload_date' | 'original_name' | 'size', dir: 'asc' | 'desc') {
-        orderBy = by;
-        orderDir = dir;
-        offset = 0;
-        hasMore = true;
-        loading = true;
-        const res = await API.files.list({
-            limit: 40,
-            offset: 0,
-            type: 'image',
-            orderBy,
-            orderDir
-        });
-        if (res.status) {
-            images = res.data;
-            offset = res.data.length;
-            if (res.data.length < 40) hasMore = false;
-        }
-        loading = false;
+    function sort(by: 'upload_date' | 'original_name' | 'size', dir: 'asc' | 'desc') {
+        const url = new URL($page.url);
+        url.searchParams.set('orderBy', by);
+        url.searchParams.set('orderDir', dir);
+        // eslint-disable-next-line svelte/no-navigation-without-resolve
+        goto(url);
     }
 
     function handleScroll(e: Event) {
@@ -133,7 +162,7 @@
         </DropdownMenu.Root>
     </div>
 
-    <div class="flex-1 overflow-y-auto" onscroll={handleScroll}>
+    <div bind:this={scrollContainer} class="flex-1 overflow-y-auto" onscroll={handleScroll}>
         {#if images.length === 0}
             <Card.Root class="border-destructive/50 bg-destructive/10">
                 <Card.Header>

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { API } from '$/lib/api';
-    import { invalidateAll } from '$app/navigation';
+    import { goto, invalidateAll } from '$app/navigation';
+    import { page } from '$app/stores';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
@@ -14,12 +15,6 @@
     let { data }: { data: PageData } = $props();
 
     let videos = $derived(data.videos);
-    let orderBy = $state<'upload_date' | 'original_name' | 'size'>('upload_date');
-    let orderDir = $state<'asc' | 'desc'>('desc');
-
-    $effect(() => {
-        videos = data.videos;
-    });
 
     function deleteFile(id: string) {
         toast('Are you sure you want to delete this video?', {
@@ -54,19 +49,12 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    async function sort(by: 'upload_date' | 'original_name' | 'size', dir: 'asc' | 'desc') {
-        orderBy = by;
-        orderDir = dir;
-        const res = await API.files.list({
-            limit: 40,
-            offset: 0,
-            type: 'video',
-            orderBy,
-            orderDir
-        });
-        if (res.status) {
-            videos = res.data;
-        }
+    function sort(by: 'upload_date' | 'original_name' | 'size', dir: 'asc' | 'desc') {
+        const url = new URL($page.url);
+        url.searchParams.set('orderBy', by);
+        url.searchParams.set('orderDir', dir);
+        // eslint-disable-next-line svelte/no-navigation-without-resolve
+        goto(url);
     }
 </script>
 

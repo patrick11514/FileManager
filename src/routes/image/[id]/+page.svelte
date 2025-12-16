@@ -4,6 +4,7 @@
     import { resolve } from '$app/paths';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
+    import ArrowLeft from '@lucide/svelte/icons/arrow-left';
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import { toast } from 'svelte-sonner';
     import type { PageData } from './$types';
@@ -43,7 +44,22 @@
     }
 </script>
 
-<div class="flex h-full items-center justify-center p-4">
+<div class="flex h-full flex-col items-center justify-center gap-4 p-4">
+    <div class="flex w-full max-w-4xl justify-start">
+        <Button
+            href={resolve('/images')}
+            onclick={(e) => {
+                e.preventDefault();
+                history.back();
+            }}
+            variant="ghost"
+            size="sm"
+            class="gap-2"
+        >
+            <ArrowLeft class="size-4" />
+            Back to Images
+        </Button>
+    </div>
     <Card.Root class="w-full max-w-4xl">
         <Card.Content class="p-6">
             <div class="flex flex-col items-center gap-6">
