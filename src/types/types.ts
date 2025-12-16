@@ -1,3 +1,5 @@
+import type { ErrorApiResponse } from '@patrick115/sveltekitapi';
+
 export type UserState =
     | {
           logged: false;
@@ -8,5 +10,13 @@ export type UserState =
       };
 
 export type UserData = {
-    //TODO
+    id: number;
+    username: string;
 };
+
+export type SuccessApiResponse<T> = {
+    status: true;
+    data: T;
+};
+
+export type ApiResult<T> = SuccessApiResponse<T> | (ErrorApiResponse & { status: false });

@@ -1,0 +1,9 @@
+{
+    "servers": {
+        "svelte-shadcn": {
+            "url": "https://shadcn-svelte.mastra.cloud/api/mcp/shadcn/mcp",
+            "type": "http"
+        }
+    },
+    "inputs": []
+}

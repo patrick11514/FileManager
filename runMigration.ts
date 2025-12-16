@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 
 import dotenv from 'dotenv';
 import { FileMigrationProvider, Kysely, Migrator, MysqlDialect } from 'kysely';

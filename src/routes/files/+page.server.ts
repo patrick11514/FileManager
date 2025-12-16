@@ -1,0 +1,17 @@
+import { Server } from '$/lib/server/server';
+import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+
+export const load = (async (event) => {
+    const res = await Server.ssr.files.list(event);
+    if (!res.status) {
+        throw error(res.code, res.message);
+    }
+    const files = res.data;
+    const otherFiles = files.filter(
+        (f) => !f.mime_type.startsWith('image/') && !f.mime_type.startsWith('video/')
+    );
+    return {
+        files: otherFiles
+    };
+}) satisfies PageServerLoad;
