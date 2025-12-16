@@ -29,9 +29,10 @@
 <h2 class="mb-6 text-2xl font-bold">Images</h2>
 
 <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-    {#each data.images as image}
+    {#each data.images as image (image.id)}
         <Card.Root class="overflow-hidden transition-shadow hover:shadow-md">
             <Card.Content class="p-0">
+                <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
                 <a href="/image/{image.id}" class="relative block aspect-square bg-muted">
                     <img
                         src="/raw/images/{image.id}{getExt(image.original_name)}?width=300"

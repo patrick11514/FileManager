@@ -26,8 +26,12 @@
             error = '';
             toast.success('User created successfully');
             invalidateAll();
-        } catch (e: any) {
-            toast.error(e.message || 'Failed to create user');
+        } catch (e) {
+            if (e instanceof Error) {
+                toast.error(e.message);
+            } else {
+                toast.error('Failed to create user');
+            }
         }
     }
 </script>
@@ -70,7 +74,7 @@
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {#each data.users as user}
+                    {#each data.users as user (user.id)}
                         <Table.Row>
                             <Table.Cell class="font-medium">{user.username}</Table.Cell>
                             <Table.Cell class="text-right">{user.id}</Table.Cell>

@@ -11,7 +11,7 @@ export const usersRouter = {
             username: z.string(),
             password: z.string()
         })
-    ).query(async ({ input, ctx }) => {
+    ).query(async ({ input }) => {
         const hashedPassword = await bcrypt.hash(input.password, 10);
 
         try {
@@ -22,7 +22,7 @@ export const usersRouter = {
                     password: hashedPassword
                 })
                 .execute();
-        } catch (e) {
+        } catch {
             return {
                 status: false,
                 code: 400,
@@ -36,7 +36,7 @@ export const usersRouter = {
             data
         } satisfies SuccessApiResponse<typeof data>;
     }),
-    list: authProcedure.GET.query(async ({ ctx }) => {
+    list: authProcedure.GET.query(async () => {
         const data = await conn.selectFrom('users').select(['id', 'username']).execute();
         return {
             status: true,

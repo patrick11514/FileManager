@@ -12,7 +12,8 @@
                 alert(res.message);
                 return;
             }
-            goto('/images');
+            // eslint-disable-next-line svelte/no-navigation-without-resolve
+            await goto('/images');
         }
     }
 

@@ -17,9 +17,14 @@
                 error = res.message;
                 return;
             }
-            goto('/');
-        } catch (e: any) {
-            error = e.message || 'Login failed';
+            // eslint-disable-next-line svelte/no-navigation-without-resolve
+            await goto('/');
+        } catch (e) {
+            if (e instanceof Error) {
+                error = e.message;
+            } else {
+                error = 'Login failed';
+            }
         }
     }
 </script>

@@ -12,9 +12,11 @@ export const load = (async (event) => {
         return {
             file: res.data
         };
-    } catch (e: any) {
-        if (e?.status && e?.body?.message) {
-            throw error(e.status, e.body.message);
+    } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = e as any;
+        if (err?.status && err?.body?.message) {
+            throw error(err.status, err.body.message);
         }
         throw error(404, 'File not found');
     }

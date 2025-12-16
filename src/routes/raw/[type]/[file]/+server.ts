@@ -38,6 +38,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
             if (existsSync(cacheFilePath)) {
                 const stats = await stat(cacheFilePath);
                 const stream = createReadStream(cacheFilePath);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return new Response(stream as any, {
                     headers: {
                         'Content-Type': `image/${f}`,
@@ -62,6 +63,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
             const buffer = await pipeline.toBuffer();
             await writeFile(cacheFilePath, buffer);
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return new Response(buffer as any, {
                 headers: {
                     'Content-Type': `image/${f}`,
@@ -93,6 +95,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
         headers['Content-Disposition'] = `attachment; filename="${file}"`;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Response(stream as any, {
         headers
     });

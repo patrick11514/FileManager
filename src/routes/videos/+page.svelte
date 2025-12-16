@@ -37,11 +37,12 @@
 <h2 class="mb-6 text-2xl font-bold">Videos</h2>
 
 <div class="space-y-4">
-    {#each data.videos as video}
+    {#each data.videos as video (video.id)}
         <Card.Root>
             <Card.Content class="flex items-center justify-between p-4">
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
+                        <!-- eslint-disable svelte/no-navigation-without-resolve -->
                         <a
                             href="/raw/video/{video.id}{getExt(video.original_name)}"
                             target="_blank"
@@ -49,6 +50,7 @@
                         >
                             {video.original_name}
                         </a>
+                        <!-- eslint-enable svelte/no-navigation-without-resolve -->
                     </div>
                     <div class="mt-1 flex items-center text-sm text-muted-foreground">
                         <span>{formatSize(video.size)}</span>

@@ -45,7 +45,7 @@ export const filesRouter = {
             data
         } satisfies SuccessApiResponse<typeof data>;
     }),
-    list: authProcedure.GET.query(async ({ ctx }) => {
+    list: authProcedure.GET.query(async () => {
         const data = await conn
             .selectFrom('files')
             .selectAll()
@@ -56,7 +56,7 @@ export const filesRouter = {
             data
         } satisfies SuccessApiResponse<typeof data>;
     }),
-    get: authProcedure.POST.input(z.object({ id: z.string() })).query(async ({ input, ctx }) => {
+    get: authProcedure.POST.input(z.object({ id: z.string() })).query(async ({ input }) => {
         const file = await conn
             .selectFrom('files')
             .selectAll()
@@ -74,7 +74,7 @@ export const filesRouter = {
             data: file
         } satisfies SuccessApiResponse<typeof file>;
     }),
-    delete: authProcedure.POST.input(z.object({ id: z.string() })).query(async ({ input, ctx }) => {
+    delete: authProcedure.POST.input(z.object({ id: z.string() })).query(async ({ input }) => {
         const file = await conn
             .selectFrom('files')
             .selectAll()

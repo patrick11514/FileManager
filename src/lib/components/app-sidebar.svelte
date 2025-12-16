@@ -54,6 +54,7 @@
                         <Sidebar.MenuItem>
                             <Sidebar.MenuButton isActive={$page.url.pathname === item.url}>
                                 {#snippet child({ props })}
+                                    <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
                                     <a href={item.url} {...props}>
                                         <item.icon />
                                         <span>{item.title}</span>

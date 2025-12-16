@@ -1,5 +1,3 @@
- 
-
 import dotenv from 'dotenv';
 import { FileMigrationProvider, Kysely, Migrator, MysqlDialect } from 'kysely';
 import { createPool } from 'mysql2';

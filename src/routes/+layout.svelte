@@ -11,10 +11,11 @@
     import { Toaster } from '$lib/components/ui/sonner/index.js';
     import LogOut from '@lucide/svelte/icons/log-out';
     import { ModeWatcher } from 'mode-watcher';
+    import type { Snippet } from 'svelte';
     import type { LayoutData } from './$types';
     import './layout.css';
 
-    let { children, data }: { children: any; data: LayoutData } = $props();
+    let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
     $effect(() => {
         API.hydrateFromServer(data.api);
@@ -22,7 +23,8 @@
 
     async function logout() {
         await API.auth.logout();
-        goto('/login');
+        // eslint-disable-next-line svelte/no-navigation-without-resolve
+        await goto('/login');
     }
 
     function getPageTitle(pathname: string) {

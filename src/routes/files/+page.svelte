@@ -50,11 +50,12 @@
                 </Table.Row>
             </Table.Header>
             <Table.Body>
-                {#each data.files as file}
+                {#each data.files as file (file.id)}
                     <Table.Row>
                         <Table.Cell class="font-medium">
                             <div class="flex items-center gap-2">
                                 <FileText class="h-4 w-4 text-muted-foreground" />
+                                <!-- eslint-disable svelte/no-navigation-without-resolve -->
                                 <a
                                     href="/raw/file/{file.id}{getExt(file.original_name)}"
                                     target="_blank"
@@ -62,6 +63,7 @@
                                 >
                                     {file.original_name}
                                 </a>
+                                <!-- eslint-enable svelte/no-navigation-without-resolve -->
                             </div>
                         </Table.Cell>
                         <Table.Cell>{formatSize(file.size)}</Table.Cell>
