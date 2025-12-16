@@ -9,31 +9,41 @@
 
     let { user }: { user: { username: string } } = $props();
 
-    const items = [
+    const groups = [
         {
-            title: 'Dashboard',
-            url: '/',
-            icon: House
+            label: 'General',
+            items: [
+                {
+                    title: 'Dashboard',
+                    url: '/',
+                    icon: House
+                },
+                {
+                    title: 'Users',
+                    url: '/users',
+                    icon: Users
+                }
+            ]
         },
         {
-            title: 'Files',
-            url: '/files',
-            icon: FileText
-        },
-        {
-            title: 'Images',
-            url: '/images',
-            icon: Image
-        },
-        {
-            title: 'Videos',
-            url: '/videos',
-            icon: Video
-        },
-        {
-            title: 'Users',
-            url: '/users',
-            icon: Users
+            label: 'Content',
+            items: [
+                {
+                    title: 'Images',
+                    url: '/images',
+                    icon: Image
+                },
+                {
+                    title: 'Videos',
+                    url: '/videos',
+                    icon: Video
+                },
+                {
+                    title: 'Files',
+                    url: '/files',
+                    icon: FileText
+                }
+            ]
         }
     ];
 </script>
@@ -46,25 +56,28 @@
         </div>
     </Sidebar.Header>
     <Sidebar.Content>
-        <Sidebar.Group>
-            <Sidebar.GroupLabel>Application</Sidebar.GroupLabel>
-            <Sidebar.GroupContent>
-                <Sidebar.Menu>
-                    {#each items as item (item.title)}
-                        <Sidebar.MenuItem>
-                            <Sidebar.MenuButton isActive={$page.url.pathname === item.url}>
-                                {#snippet child({ props })}
-                                    <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                    <a href={item.url} {...props}>
-                                        <item.icon />
-                                        <span>{item.title}</span>
-                                    </a>
-                                {/snippet}
-                            </Sidebar.MenuButton>
-                        </Sidebar.MenuItem>
-                    {/each}
-                </Sidebar.Menu>
-            </Sidebar.GroupContent>
-        </Sidebar.Group>
+        {#each groups as group (group.label)}
+            <Sidebar.Group>
+                <Sidebar.GroupLabel>{group.label}</Sidebar.GroupLabel>
+                <Sidebar.GroupContent>
+                    <Sidebar.Menu>
+                        {#each group.items as item (item.title)}
+                            <Sidebar.MenuItem>
+                                <Sidebar.MenuButton isActive={$page.url.pathname === item.url}>
+                                    {#snippet child({ props })}
+                                        <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+                                        <a href={item.url} {...props}>
+                                            <item.icon />
+                                            <span>{item.title}</span>
+                                        </a>
+                                    {/snippet}
+                                </Sidebar.MenuButton>
+                            </Sidebar.MenuItem>
+                        {/each}
+                    </Sidebar.Menu>
+                </Sidebar.GroupContent>
+            </Sidebar.Group>
+        {/each}
     </Sidebar.Content>
+    <Sidebar.Footer />
 </Sidebar.Root>

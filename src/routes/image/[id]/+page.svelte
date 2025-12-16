@@ -1,20 +1,33 @@
 <script lang="ts">
     import { API } from '$/lib/api';
     import { goto } from '$app/navigation';
+    import { Button } from '$lib/components/ui/button/index.js';
+    import * as Card from '$lib/components/ui/card/index.js';
+    import Trash2 from '@lucide/svelte/icons/trash-2';
+    import { toast } from 'svelte-sonner';
     import type { PageData } from './$types';
 
     let { data }: { data: PageData } = $props();
 
-    async function deleteFile() {
-        if (confirm('Are you sure?')) {
-            const res = await API.files.delete({ id: data.file.id });
-            if (!res.status) {
-                alert(res.message);
-                return;
+    function deleteFile() {
+        toast('Are you sure you want to delete this image?', {
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    const res = await API.files.delete({ id: data.file.id });
+                    if (!res.status) {
+                        toast.error(res.message);
+                        return;
+                    }
+                    // eslint-disable-next-line svelte/no-navigation-without-resolve
+                    await goto('/images');
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => {}
             }
-            // eslint-disable-next-line svelte/no-navigation-without-resolve
-            await goto('/images');
-        }
+        });
     }
 
     function getExt(filename: string) {
@@ -30,45 +43,31 @@
     }
 </script>
 
-<div class="mx-auto max-w-4xl overflow-hidden rounded-lg bg-white shadow">
-    <div class="p-6">
-        <div class="mb-6 flex items-start justify-between">
-            <h2 class="truncate text-2xl font-bold">{data.file.original_name}</h2>
-            <button
-                onclick={deleteFile}
-                class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-            >
-                Delete
-            </button>
-        </div>
-
-        <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-            <div class="flex justify-center rounded-lg bg-gray-100 p-4">
+<div class="flex h-full items-center justify-center p-4">
+    <Card.Root class="w-full max-w-4xl">
+        <Card.Content class="p-6">
+            <div class="flex flex-col items-center gap-6">
                 <img
                     src="/raw/images/{data.file.id}{getExt(data.file.original_name)}"
                     alt={data.file.original_name}
-                    class="max-h-125 object-contain"
+                    class="max-h-[70vh] w-full rounded-md object-contain"
                 />
-            </div>
-
-            <div class="space-y-4">
-                <h3 class="border-b pb-2 text-lg font-medium">Metadata</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-gray-500">Size</div>
-                    <div class="font-medium">{formatSize(data.file.size)}</div>
-
-                    <div class="text-gray-500">Type</div>
-                    <div class="font-medium">{data.file.mime_type}</div>
-
-                    <div class="text-gray-500">Uploaded</div>
-                    <div class="font-medium">
-                        {new Date(data.file.upload_date).toLocaleString()}
+                <div class="flex w-full items-center justify-between">
+                    <div class="flex flex-col">
+                        <h2 class="text-xl font-semibold">{data.file.original_name}</h2>
+                        <p class="text-sm text-muted-foreground">
+                            {formatSize(data.file.size)} • {new Date(
+                                data.file.upload_date
+                            ).toLocaleDateString()}
+                        </p>
                     </div>
-
-                    <div class="text-gray-500">ID</div>
-                    <div class="font-mono text-xs font-medium">{data.file.id}</div>
+                    <div class="flex gap-2">
+                        <Button variant="destructive" size="icon" onclick={deleteFile}>
+                            <Trash2 class="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </Card.Content>
+    </Card.Root>
 </div>

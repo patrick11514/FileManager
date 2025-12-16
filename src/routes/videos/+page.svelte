@@ -9,16 +9,25 @@
 
     let { data }: { data: PageData } = $props();
 
-    async function deleteFile(id: string) {
-        if (confirm('Are you sure?')) {
-            const res = await API.files.delete({ id });
-            if (!res.status) {
-                toast.error(res.message);
-                return;
+    function deleteFile(id: string) {
+        toast('Are you sure you want to delete this video?', {
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    const res = await API.files.delete({ id });
+                    if (!res.status) {
+                        toast.error(res.message);
+                        return;
+                    }
+                    toast.success('Video removed successfully');
+                    invalidateAll();
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => {}
             }
-            toast.success('Video removed successfully');
-            invalidateAll();
-        }
+        });
     }
 
     function getExt(filename: string) {
@@ -34,44 +43,42 @@
     }
 </script>
 
-<h2 class="mb-6 text-2xl font-bold">Videos</h2>
-
-<div class="space-y-4">
-    {#each data.videos as video (video.id)}
-        <Card.Root>
-            <Card.Content class="flex items-center justify-between p-4">
-                <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2">
-                        <!-- eslint-disable svelte/no-navigation-without-resolve -->
-                        <a
-                            href="/raw/video/{video.id}{getExt(video.original_name)}"
-                            target="_blank"
-                            class="truncate font-medium text-primary hover:underline"
-                        >
-                            {video.original_name}
-                        </a>
-                        <!-- eslint-enable svelte/no-navigation-without-resolve -->
+{#if data.videos.length === 0}
+    <Card.Root class="border-destructive/50 bg-destructive/10">
+        <Card.Header>
+            <Card.Title class="text-destructive">No videos uploaded</Card.Title>
+        </Card.Header>
+        <Card.Content>
+            <p class="text-destructive-foreground">There are no videos uploaded yet.</p>
+        </Card.Content>
+    </Card.Root>
+{:else}
+    <div class="space-y-4">
+        {#each data.videos as video (video.id)}
+            <Card.Root>
+                <Card.Content class="flex items-center justify-between p-4">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <!-- eslint-disable svelte/no-navigation-without-resolve -->
+                            <a
+                                href="/raw/video/{video.id}{getExt(video.original_name)}"
+                                target="_blank"
+                                class="font-medium text-primary hover:underline"
+                            >
+                                {video.original_name}
+                            </a>
+                            <!-- eslint-enable svelte/no-navigation-without-resolve -->
+                        </div>
+                        <div class="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>{formatSize(video.size)}</span>
+                            <span>{new Date(video.upload_date).toLocaleDateString()}</span>
+                        </div>
                     </div>
-                    <div class="mt-1 flex items-center text-sm text-muted-foreground">
-                        <span>{formatSize(video.size)}</span>
-                        <span class="mx-2">&middot;</span>
-                        <span>{new Date(video.upload_date).toLocaleDateString()}</span>
-                    </div>
-                </div>
-                <div class="ml-4 shrink-0">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onclick={(e) => {
-                            e.preventDefault();
-                            deleteFile(video.id);
-                        }}
-                        class="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive/90"
-                    >
-                        <Trash2 class="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onclick={() => deleteFile(video.id)}>
+                        <Trash2 class="h-4 w-4 text-destructive" />
                     </Button>
-                </div>
-            </Card.Content>
-        </Card.Root>
-    {/each}
-</div>
+                </Card.Content>
+            </Card.Root>
+        {/each}
+    </div>
+{/if}

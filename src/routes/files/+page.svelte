@@ -11,16 +11,25 @@
 
     let { data }: { data: PageData } = $props();
 
-    async function deleteFile(id: string) {
-        if (confirm('Are you sure?')) {
-            const res = await API.files.delete({ id });
-            if (!res.status) {
-                toast.error(res.message);
-                return;
+    function deleteFile(id: string) {
+        toast('Are you sure you want to delete this file?', {
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    const res = await API.files.delete({ id });
+                    if (!res.status) {
+                        toast.error(res.message);
+                        return;
+                    }
+                    toast.success('File removed successfully');
+                    invalidateAll();
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => {}
             }
-            toast.success('File removed successfully');
-            invalidateAll();
-        }
+        });
     }
 
     function getExt(filename: string) {
@@ -36,46 +45,61 @@
     }
 </script>
 
-<h2 class="mb-6 text-2xl font-bold">Files</h2>
-
-<Card.Root>
-    <Card.Content class="p-0">
-        <Table.Root>
-            <Table.Header>
-                <Table.Row>
-                    <Table.Head>Name</Table.Head>
-                    <Table.Head>Size</Table.Head>
-                    <Table.Head>Date</Table.Head>
-                    <Table.Head class="text-right">Actions</Table.Head>
-                </Table.Row>
-            </Table.Header>
-            <Table.Body>
-                {#each data.files as file (file.id)}
+{#if data.files.length === 0}
+    <Card.Root class="border-destructive/50 bg-destructive/10">
+        <Card.Header>
+            <Card.Title class="text-destructive">No files uploaded</Card.Title>
+        </Card.Header>
+        <Card.Content>
+            <p class="text-destructive-foreground">There are no files uploaded yet.</p>
+        </Card.Content>
+    </Card.Root>
+{:else}
+    <Card.Root>
+        <Card.Content class="p-0">
+            <Table.Root>
+                <Table.Header>
                     <Table.Row>
-                        <Table.Cell class="font-medium">
-                            <div class="flex items-center gap-2">
-                                <FileText class="h-4 w-4 text-muted-foreground" />
-                                <!-- eslint-disable svelte/no-navigation-without-resolve -->
-                                <a
-                                    href="/raw/file/{file.id}{getExt(file.original_name)}"
-                                    target="_blank"
-                                    class="text-primary hover:underline"
-                                >
-                                    {file.original_name}
-                                </a>
-                                <!-- eslint-enable svelte/no-navigation-without-resolve -->
-                            </div>
-                        </Table.Cell>
-                        <Table.Cell>{formatSize(file.size)}</Table.Cell>
-                        <Table.Cell>{new Date(file.upload_date).toLocaleDateString()}</Table.Cell>
-                        <Table.Cell class="text-right">
-                            <Button variant="ghost" size="icon" onclick={() => deleteFile(file.id)}>
-                                <Trash2 class="h-4 w-4 text-destructive" />
-                            </Button>
-                        </Table.Cell>
+                        <Table.Head>Name</Table.Head>
+                        <Table.Head>Size</Table.Head>
+                        <Table.Head>Date</Table.Head>
+                        <Table.Head class="text-right">Actions</Table.Head>
                     </Table.Row>
-                {/each}
-            </Table.Body>
-        </Table.Root>
-    </Card.Content>
-</Card.Root>
+                </Table.Header>
+                <Table.Body>
+                    {#each data.files as file (file.id)}
+                        <Table.Row>
+                            <Table.Cell class="font-medium">
+                                <div class="flex items-center gap-2">
+                                    <FileText class="h-4 w-4 text-muted-foreground" />
+                                    <!-- eslint-disable svelte/no-navigation-without-resolve -->
+                                    <a
+                                        href="/raw/file/{file.id}{getExt(file.original_name)}"
+                                        target="_blank"
+                                        class="text-primary hover:underline"
+                                    >
+                                        {file.original_name}
+                                    </a>
+                                    <!-- eslint-enable svelte/no-navigation-without-resolve -->
+                                </div>
+                            </Table.Cell>
+                            <Table.Cell>{formatSize(file.size)}</Table.Cell>
+                            <Table.Cell
+                                >{new Date(file.upload_date).toLocaleDateString()}</Table.Cell
+                            >
+                            <Table.Cell class="text-right">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onclick={() => deleteFile(file.id)}
+                                >
+                                    <Trash2 class="h-4 w-4 text-destructive" />
+                                </Button>
+                            </Table.Cell>
+                        </Table.Row>
+                    {/each}
+                </Table.Body>
+            </Table.Root>
+        </Card.Content>
+    </Card.Root>
+{/if}

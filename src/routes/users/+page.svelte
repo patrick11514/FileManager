@@ -6,6 +6,7 @@
     import { Input } from '$lib/components/ui/input/index.js';
     import { Label } from '$lib/components/ui/label/index.js';
     import * as Table from '$lib/components/ui/table/index.js';
+    import Trash2 from '@lucide/svelte/icons/trash-2';
     import { toast } from 'svelte-sonner';
     import type { PageData } from './$types';
 
@@ -34,9 +35,28 @@
             }
         }
     }
-</script>
 
-<h2 class="mb-6 text-2xl font-bold">User Management</h2>
+    function deleteUser(id: number) {
+        toast('Are you sure you want to delete this user?', {
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    const res = await API.users.delete({ id });
+                    if (!res.status) {
+                        toast.error(res.message);
+                        return;
+                    }
+                    toast.success('User deleted successfully');
+                    invalidateAll();
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => {}
+            }
+        });
+    }
+</script>
 
 <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
     <Card.Root>
@@ -71,6 +91,7 @@
                     <Table.Row>
                         <Table.Head>Username</Table.Head>
                         <Table.Head class="text-right">ID</Table.Head>
+                        <Table.Head class="text-right">Actions</Table.Head>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -78,6 +99,15 @@
                         <Table.Row>
                             <Table.Cell class="font-medium">{user.username}</Table.Cell>
                             <Table.Cell class="text-right">{user.id}</Table.Cell>
+                            <Table.Cell class="text-right">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onclick={() => deleteUser(user.id)}
+                                >
+                                    <Trash2 class="h-4 w-4 text-destructive" />
+                                </Button>
+                            </Table.Cell>
                         </Table.Row>
                     {/each}
                 </Table.Body>

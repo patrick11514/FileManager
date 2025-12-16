@@ -42,5 +42,13 @@ export const usersRouter = {
             status: true,
             data
         } satisfies SuccessApiResponse<typeof data>;
+    }),
+    delete: authProcedure.POST.input(z.object({ id: z.number() })).query(async ({ input }) => {
+        await conn.deleteFrom('users').where('id', '=', input.id).execute();
+        const data = { success: true };
+        return {
+            status: true,
+            data
+        } satisfies SuccessApiResponse<typeof data>;
     })
 };
