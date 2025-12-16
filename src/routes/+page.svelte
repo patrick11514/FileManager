@@ -6,6 +6,9 @@
     import UploadCloud from '@lucide/svelte/icons/cloud-upload';
     import { toast } from 'svelte-sonner';
     import { v4 as uuidv4 } from 'uuid';
+    import type { PageData } from './$types';
+
+    let { data }: { data: PageData } = $props();
 
     let dragging = $state(false);
     let uploading = $state(false);
@@ -135,7 +138,9 @@
                         >
                         or drag and drop
                     </div>
-                    <p class="text-xs text-muted-foreground">PNG, JPG, GIF, MP4, PDF up to 10MB</p>
+                    <p class="text-xs text-muted-foreground">
+                        PNG, JPG, GIF, MP4, PDF up to {data.uploadLimit}
+                    </p>
                 </div>
             </div>
 
