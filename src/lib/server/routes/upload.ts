@@ -1,3 +1,4 @@
+import { BODY_SIZE_LIMIT } from '$env/static/private';
 import { AnyFormDataInput, type ErrorApiResponse } from '@patrick115/sveltekitapi';
 import { writeFile } from 'fs/promises';
 import path from 'path';
@@ -22,6 +23,15 @@ export default tokenProcedure.POST.input(AnyFormDataInput).query(async ({ ctx, i
     const uploadDir = path.resolve('uploads');
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    if (buffer.length > parseInt(BODY_SIZE_LIMIT)) {
+        return {
+            status: false,
+            code: 413,
+            message: 'File too large'
+        } satisfies ErrorApiResponse;
+    }
+
     await writeFile(path.join(uploadDir, filename), buffer);
 
     await conn
