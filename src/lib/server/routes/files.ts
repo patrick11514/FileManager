@@ -100,7 +100,6 @@ export const filesRouter = {
             console.error('Failed to delete cached variants', e);
         }
 
-
         await conn.deleteFrom('files').where('id', '=', input.id).execute();
 
         return {

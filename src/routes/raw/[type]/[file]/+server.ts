@@ -3,6 +3,7 @@ import { createReadStream, existsSync } from 'fs';
 import { stat, writeFile } from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
+import { Readable } from 'stream';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params, url }) => {
@@ -39,7 +40,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
                 const stats = await stat(cacheFilePath);
                 const stream = createReadStream(cacheFilePath);
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                return new Response(stream as any, {
+                return new Response(Readable.toWeb(stream) as any, {
                     headers: {
                         'Content-Type': `image/${f}`,
                         'Content-Length': stats.size.toString()
@@ -96,7 +97,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new Response(stream as any, {
+    return new Response(Readable.toWeb(stream) as any, {
         headers
     });
 };
