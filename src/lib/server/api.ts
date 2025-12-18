@@ -21,7 +21,7 @@ export const authProcedure = procedure.use(async ({ ctx, next }) => {
 export const tokenProcedure = procedure.use(async ({ next, ev }) => {
     const authHeader = ev.request.headers.get('Authorization');
 
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new MiddleWareError({
             status: false,
             code: 401,
