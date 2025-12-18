@@ -4,6 +4,7 @@
     import FileText from '@lucide/svelte/icons/file-text';
     import House from '@lucide/svelte/icons/house';
     import Image from '@lucide/svelte/icons/image';
+    import Settings from '@lucide/svelte/icons/settings';
     import Users from '@lucide/svelte/icons/users';
     import Video from '@lucide/svelte/icons/video';
 
@@ -22,6 +23,11 @@
                     title: 'Users',
                     url: '/users',
                     icon: Users
+                },
+                {
+                    title: 'Settings',
+                    url: '/settings',
+                    icon: Settings
                 }
             ]
         },

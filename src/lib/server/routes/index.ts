@@ -1,13 +1,17 @@
 import { router } from '../api';
+import { apiKeysRouter } from './api_keys';
 import { authRouter } from './auth';
 import { filesRouter } from './files';
+import upload from './upload';
 import { usersRouter } from './users';
 
 //DOCS: https://raw.githubusercontent.com/patrick11514/SveltekitAPI/refs/heads/main/README.md
 export const r = router({
     auth: authRouter,
     files: filesRouter,
-    users: usersRouter
+    users: usersRouter,
+    apiKeys: apiKeysRouter,
+    upload
 });
 
 export type AppRouter = typeof r;

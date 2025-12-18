@@ -3,29 +3,37 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from 'kysely';
+import type { ColumnType } from "kysely";
 
-export type Generated<T> =
-    T extends ColumnType<infer S, infer I, infer U>
-        ? ColumnType<S, I | undefined, U>
-        : ColumnType<T, T | undefined, T>;
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
+
+export interface ApiKeys {
+  created_at: Generated<Date>;
+  id: Generated<number>;
+  key: string;
+  name: string;
+  user_id: number;
+}
 
 export interface Files {
-    id: string;
-    mime_type: string;
-    original_name: string;
-    size: number;
-    upload_date: Generated<Date>;
-    uploaded_by: Generated<number | null>;
+  id: string;
+  mime_type: string;
+  original_name: string;
+  size: number;
+  upload_date: Generated<Date>;
+  uploaded_by: Generated<number | null>;
 }
 
 export interface Users {
-    id: Generated<number>;
-    password: string;
-    username: string;
+  id: Generated<number>;
+  password: string;
+  username: string;
 }
 
 export interface DB {
-    files: Files;
-    users: Users;
+  api_keys: ApiKeys;
+  files: Files;
+  users: Users;
 }
