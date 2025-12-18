@@ -42,6 +42,13 @@ export const uploadFile = async (fd: FormData, user_id: number) => {
         return null;
     }
 
+    let type: 'files' | 'images' | 'videos' = 'files';
+    if (file.type.startsWith('image/')) {
+        type = 'images';
+    } else if (file.type.startsWith('video/')) {
+        type = 'videos';
+    }
+
     const id = uuidv4();
     const originalName = file.name || 'unknown';
     const ext = path.extname(originalName);
@@ -71,6 +78,8 @@ export const uploadFile = async (fd: FormData, user_id: number) => {
 
     return {
         id: id,
-        path: filePath
+        path: filePath,
+        url: `/raw/${type}/${filename}`,
+        type
     };
 };

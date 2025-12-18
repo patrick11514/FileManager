@@ -3,7 +3,7 @@ import { AnyFormDataInput, type ErrorApiResponse } from '@patrick115/sveltekitap
 import { tokenProcedure } from '../api';
 import { uploadFile } from '../functions';
 
-export default tokenProcedure.POST.input(AnyFormDataInput).query(async ({ ctx, input }) => {
+export default tokenProcedure.POST.input(AnyFormDataInput).query(async ({ ctx, input, ev }) => {
     const uploaded = await uploadFile(input, ctx.id);
 
     if (!uploaded) {
@@ -16,6 +16,6 @@ export default tokenProcedure.POST.input(AnyFormDataInput).query(async ({ ctx, i
 
     return {
         status: true,
-        data: uploaded.path
+        data: `${ev.url.origin}/${uploaded.url}`
     } satisfies SuccessApiResponse<string>;
 });
