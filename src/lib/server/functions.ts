@@ -1,7 +1,7 @@
 import type { UserData, UserState } from '$/types/types';
 import type { Cookies } from '@sveltejs/kit';
 import { mkdir, stat, writeFile } from 'fs/promises';
-import path from 'path/win32';
+import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { conn, jwt } from './variables';
 

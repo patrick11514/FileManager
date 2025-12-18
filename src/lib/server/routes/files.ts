@@ -1,5 +1,5 @@
 import { AnyFormDataInput, type ErrorApiResponse } from '@patrick115/sveltekitapi';
-import { unlink } from 'fs/promises';
+import { readdir, unlink } from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
 import type { SuccessApiResponse } from '../../../types/types';
@@ -88,6 +88,18 @@ export const filesRouter = {
         } catch (e) {
             console.error('Failed to delete file from disk', e);
         }
+
+        //Delete cached variants for images
+        const uploadsDir = path.resolve('uploads');
+        try {
+            const files = await readdir(uploadsDir);
+            const cachedFiles = files.filter((f) => f.startsWith(`${file.id}_`) && f.endsWith(ext));
+
+            await Promise.all(cachedFiles.map((f) => unlink(path.join(uploadsDir, f))));
+        } catch (e) {
+            console.error('Failed to delete cached variants', e);
+        }
+
 
         await conn.deleteFrom('files').where('id', '=', input.id).execute();
 
