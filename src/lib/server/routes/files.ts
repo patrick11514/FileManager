@@ -1,15 +1,15 @@
 import { AnyFormDataInput, type ErrorApiResponse } from '@patrick115/sveltekitapi';
-import { unlink, writeFile } from 'fs/promises';
+import { unlink } from 'fs/promises';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import type { SuccessApiResponse } from '../../../types/types';
 import { authProcedure } from '../api';
+import { uploadFile } from '../functions';
 import { conn } from '../variables';
 
 export const filesRouter = {
     upload: authProcedure.POST.input(AnyFormDataInput).query(async ({ input, ctx }) => {
-        const file = input.get('file') as File;
+        const file = await uploadFile(input, ctx.id);
         if (!file) {
             return {
                 status: false,
@@ -18,32 +18,9 @@ export const filesRouter = {
             } satisfies ErrorApiResponse;
         }
 
-        const id = uuidv4();
-        const originalName = file.name || 'unknown';
-        const ext = path.extname(originalName);
-
-        const filename = `${id}${ext}`;
-        const uploadDir = path.resolve('uploads');
-
-        const buffer = Buffer.from(await file.arrayBuffer());
-        await writeFile(path.join(uploadDir, filename), buffer);
-
-        await conn
-            .insertInto('files')
-            .values({
-                id,
-                original_name: originalName,
-                mime_type: file.type,
-                size: file.size,
-                uploaded_by: ctx.id
-            })
-            .execute();
-
-        const data = { success: true, id };
         return {
-            status: true,
-            data
-        } satisfies SuccessApiResponse<typeof data>;
+            status: true
+        } as const;
     }),
     list: authProcedure.POST.input(
         z.object({
@@ -114,10 +91,8 @@ export const filesRouter = {
 
         await conn.deleteFrom('files').where('id', '=', input.id).execute();
 
-        const data = { success: true };
         return {
-            status: true,
-            data
-        } satisfies SuccessApiResponse<typeof data>;
+            status: true
+        } as const;
     })
 };

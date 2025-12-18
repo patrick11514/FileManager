@@ -1,5 +1,6 @@
 <script lang="ts">
     import { API } from '$/lib/api';
+    import { invalidateAll } from '$app/navigation';
     import { Button } from '$lib/components/ui/button';
     import { Input } from '$lib/components/ui/input';
     import { Label } from '$lib/components/ui/label';
@@ -23,11 +24,11 @@
         const res = await API.apiKeys.create({ name: newKeyName });
         if (res.status) {
             toast.success('API Key created', {
-                description: res.data.key,
-                duration: Infinity,
+                description: res.data,
+                duration: 30000,
                 action: {
                     label: 'Copy',
-                    onClick: () => navigator.clipboard.writeText(res.data.key)
+                    onClick: () => navigator.clipboard.writeText(res.data)
                 }
             });
             newKeyName = '';
@@ -38,13 +39,23 @@
     }
 
     async function deleteKey(id: number) {
-        const res = await API.apiKeys.delete({ id });
-        if (res.status) {
-            toast.success('API Key deleted');
-            loadKeys();
-        } else {
-            toast.error('Failed to delete API key');
-        }
+        toast('Are you sure you want to delete this API key?', {
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    const res = await API.apiKeys.delete({ id });
+                    if (!res.status) {
+                        return;
+                    }
+                    toast.success('API Key deleted successfully');
+                    invalidateAll();
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => {}
+            }
+        });
     }
 
     onMount(() => {
@@ -62,7 +73,7 @@
                 <Label for="name">Name</Label>
                 <Input type="text" id="name" placeholder="My API Key" bind:value={newKeyName} />
             </div>
-            <Button onclick={createKey}>Create</Button>
+            <Button onclick={createKey} disabled={!newKeyName}>Create</Button>
         </div>
     </div>
 

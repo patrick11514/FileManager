@@ -1,3 +1,4 @@
+import type { SuccessApiResponse } from '$/types/types';
 import crypto from 'crypto';
 import { z } from 'zod';
 import { authProcedure } from '../api';
@@ -23,10 +24,8 @@ export const apiKeysRouter = {
 
         return {
             status: true,
-            data: {
-                key
-            }
-        };
+            data: key
+        } satisfies SuccessApiResponse<string>;
     }),
     list: authProcedure.GET.query(async ({ ctx }) => {
         const keys = await conn
@@ -38,7 +37,7 @@ export const apiKeysRouter = {
         return {
             status: true,
             data: keys
-        };
+        } satisfies SuccessApiResponse<typeof keys>;
     }),
     delete: authProcedure.DELETE.input(
         z.object({
@@ -52,10 +51,7 @@ export const apiKeysRouter = {
             .execute();
 
         return {
-            status: true,
-            data: {
-                success: true
-            }
-        };
+            status: true
+        } as const;
     })
 };
