@@ -10,6 +10,14 @@ export type Generated<T> =
         ? ColumnType<S, I | undefined, U>
         : ColumnType<T, T | undefined, T>;
 
+export interface ApiKeys {
+    created_at: Generated<Date>;
+    id: Generated<number>;
+    key: string;
+    name: string;
+    user_id: number;
+}
+
 export interface Files {
     id: string;
     mime_type: string;
@@ -26,6 +34,7 @@ export interface Users {
 }
 
 export interface DB {
+    api_keys: ApiKeys;
     files: Files;
     users: Users;
 }
