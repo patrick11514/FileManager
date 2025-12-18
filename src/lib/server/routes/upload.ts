@@ -16,6 +16,6 @@ export default tokenProcedure.POST.input(AnyFormDataInput).query(async ({ ctx, i
 
     return {
         status: true,
-        data: `${ev.url.origin}/${uploaded.url}`
+        data: `${ev.url.origin}${uploaded.url}`
     } satisfies SuccessApiResponse<string>;
 });
