@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
 import type { ErrorApiResponse, SuccessApiResponse } from '../../../types/types';
-import { authProcedure, publicProcedure } from '../api';
+import { authProcedure, procedure } from '../api';
 import { conn } from '../variables';
 
 export const albumsRouter = {
@@ -59,7 +59,7 @@ export const albumsRouter = {
             data: { id: albumId }
         } satisfies SuccessApiResponse<{ id: string }>;
     }),
-    get: publicProcedure.POST.input(z.object({ id: z.string() })).query(async ({ input }) => {
+    get: procedure.POST.input(z.object({ id: z.string() })).query(async ({ input }) => {
         const album = await conn
             .selectFrom('albums')
             .selectAll()
