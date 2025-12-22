@@ -14,6 +14,7 @@
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import { tick } from 'svelte';
     import { toast } from 'svelte-sonner';
+    import { SvelteSet } from 'svelte/reactivity';
     import type { PageData, Snapshot } from './$types';
 
     let { data }: { data: PageData } = $props();
@@ -25,7 +26,7 @@
     let scrollContainer: HTMLDivElement | undefined = $state();
 
     // Selection state
-    let selectedImages = $state<Set<string>>(new Set());
+    const selectedImages = new SvelteSet<string>();
     let isSelectionMode = $state(false);
 
     // Album creation state
@@ -107,14 +108,12 @@
         } else {
             selectedImages.add(id);
         }
-        selectedImages = selectedImages;
     }
 
     function toggleSelectionMode() {
         isSelectionMode = !isSelectionMode;
         if (!isSelectionMode) {
             selectedImages.clear();
-            selectedImages = selectedImages;
         }
     }
 
@@ -160,7 +159,6 @@
         isCreatingAlbum = false;
         albumName = '';
         selectedImages.clear();
-        selectedImages = selectedImages;
         isSelectionMode = false;
     }
 

@@ -94,7 +94,7 @@ export const albumsRouter = {
             images: typeof images;
         }>;
     }),
-    list: authProcedure.POST.query(async ({ ctx }) => {
+    list: authProcedure.GET.query(async ({ ctx }) => {
         const albums = await conn
             .selectFrom('albums')
             .selectAll()

@@ -8,7 +8,7 @@ export const load = (async (event) => {
 
     const ctx = await context(event);
 
-    if (!ctx.logged && url.pathname !== '/login') {
+    if (!ctx.logged && url.pathname !== '/login' && !url.pathname.startsWith('/album/')) {
         throw redirect(302, '/login');
     }
 

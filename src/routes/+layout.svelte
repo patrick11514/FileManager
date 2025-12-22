@@ -46,7 +46,7 @@
 <ModeWatcher />
 <Toaster position="top-center" />
 
-{#if data.user && page.url.pathname !== '/login'}
+{#if data.user && page.url.pathname !== '/login' && !page.url.pathname.startsWith('/album/')}
     <Sidebar.Provider>
         <AppSidebar user={data.user} />
         <Sidebar.Inset>
