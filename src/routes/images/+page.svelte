@@ -355,7 +355,7 @@
                     : ''}
             </Sheet.Description>
         </Sheet.Header>
-        <div class="mt-4 space-y-4">
+        <div class="mt-4 space-y-4 px-4">
             <div class="space-y-2">
                 <label for="album-name" class="text-sm font-medium">Album Name (Optional)</label>
                 <Input
