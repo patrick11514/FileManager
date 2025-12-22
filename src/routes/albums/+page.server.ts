@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 
 export const load = (async (event) => {
     try {
-        const res = await Server.ssr.albums.list(event, {});
+        const res = await Server.ssr.albums.list(event);
         if (!res.status) {
             throw error(res.code, res.message);
         }

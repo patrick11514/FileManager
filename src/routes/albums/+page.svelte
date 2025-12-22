@@ -1,5 +1,6 @@
 <script lang="ts">
     import { API } from '$/lib/api';
+    import { invalidate } from '$app/navigation';
     import { resolve } from '$app/paths';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
@@ -12,7 +13,7 @@
 
     let { data }: { data: PageData } = $props();
 
-    let albums = $state(data.albums);
+    let albums = $derived(data.albums);
 
     function formatDate(date: Date) {
         return new Date(date).toLocaleDateString('en-US', {
@@ -43,7 +44,8 @@
                         return;
                     }
                     toast.success('Album deleted successfully');
-                    albums = albums.filter((a) => a.id !== id);
+                    // Reload the page data to reflect the deletion
+                    await invalidate(() => true);
                 }
             },
             cancel: {

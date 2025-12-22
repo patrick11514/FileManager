@@ -9,6 +9,7 @@
     import { Input } from '$lib/components/ui/input/index.js';
     import * as Sheet from '$lib/components/ui/sheet/index.js';
     import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
+    import Check from '@lucide/svelte/icons/check';
     import ImagePlus from '@lucide/svelte/icons/image-plus';
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import { tick } from 'svelte';
@@ -296,18 +297,7 @@
                                             <div
                                                 class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"
                                             >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    stroke-width="3"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    class="h-6 w-6"
-                                                >
-                                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                                </svg>
+                                                <Check class="h-6 w-6" strokeWidth={3} />
                                             </div>
                                         </div>
                                     {/if}

@@ -1,6 +1,7 @@
+import { type ErrorApiResponse } from '@patrick115/sveltekitapi';
 import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
-import type { ErrorApiResponse, SuccessApiResponse } from '../../../types/types';
+import type { SuccessApiResponse } from '../../../types/types';
 import { authProcedure, procedure } from '../api';
 import { conn } from '../variables';
 
