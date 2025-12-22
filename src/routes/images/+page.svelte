@@ -6,10 +6,15 @@
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+    import { Input } from '$lib/components/ui/input/index.js';
+    import * as Sheet from '$lib/components/ui/sheet/index.js';
     import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
+    import Check from '@lucide/svelte/icons/check';
+    import ImagePlus from '@lucide/svelte/icons/image-plus';
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import { tick } from 'svelte';
     import { toast } from 'svelte-sonner';
+    import { SvelteSet } from 'svelte/reactivity';
     import type { PageData, Snapshot } from './$types';
 
     let { data }: { data: PageData } = $props();
@@ -19,6 +24,15 @@
     let loading = $state(false);
     let hasMore = $state(true);
     let scrollContainer: HTMLDivElement | undefined = $state();
+
+    // Selection state
+    const selectedImages = new SvelteSet<string>();
+    let isSelectionMode = $state(false);
+
+    // Album creation state
+    let isCreateAlbumOpen = $state(false);
+    let albumName = $state('');
+    let isCreatingAlbum = $state(false);
 
     let orderBy = $derived(
         ($page.url.searchParams.get('orderBy') as 'upload_date' | 'original_name' | 'size') ||
@@ -88,6 +102,66 @@
         });
     }
 
+    function toggleImageSelection(id: string) {
+        if (selectedImages.has(id)) {
+            selectedImages.delete(id);
+        } else {
+            selectedImages.add(id);
+        }
+    }
+
+    function toggleSelectionMode() {
+        isSelectionMode = !isSelectionMode;
+        if (!isSelectionMode) {
+            selectedImages.clear();
+        }
+    }
+
+    function openCreateAlbum() {
+        if (selectedImages.size === 0) {
+            toast.error('Please select at least one image');
+            return;
+        }
+        isCreateAlbumOpen = true;
+    }
+
+    async function createAlbum() {
+        if (selectedImages.size === 0) {
+            toast.error('Please select at least one image');
+            return;
+        }
+
+        isCreatingAlbum = true;
+        const res = await API.albums.create({
+            name: albumName.trim() || undefined,
+            fileIds: Array.from(selectedImages)
+        });
+
+        if (!res.status) {
+            toast.error(res.message);
+            isCreatingAlbum = false;
+            return;
+        }
+
+        toast.success('Album created successfully');
+
+        // Copy album link to clipboard
+        const albumUrl = `${window.location.origin}/album/${res.data.id}`;
+        try {
+            await navigator.clipboard.writeText(albumUrl);
+            toast.success('Album link copied to clipboard!');
+        } catch {
+            toast.info(`Album URL: ${albumUrl}`);
+        }
+
+        // Reset state
+        isCreateAlbumOpen = false;
+        isCreatingAlbum = false;
+        albumName = '';
+        selectedImages.clear();
+        isSelectionMode = false;
+    }
+
     function getExt(filename: string) {
         return filename.substring(filename.lastIndexOf('.'));
     }
@@ -127,7 +201,26 @@
 </script>
 
 <div class="flex h-[calc(100vh-4.1rem)] flex-col gap-4 p-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2">
+        {#if isSelectionMode}
+            <div class="flex items-center gap-2">
+                <Button variant="outline" size="sm" onclick={toggleSelectionMode}>Cancel</Button>
+                <Button
+                    variant="default"
+                    size="sm"
+                    onclick={openCreateAlbum}
+                    disabled={selectedImages.size === 0}
+                >
+                    <ImagePlus class="mr-2 h-4 w-4" />
+                    Create Album ({selectedImages.size})
+                </Button>
+            </div>
+        {:else}
+            <Button variant="outline" size="sm" onclick={toggleSelectionMode}>
+                <ImagePlus class="mr-2 h-4 w-4" />
+                Select Images
+            </Button>
+        {/if}
         <DropdownMenu.Root>
             <DropdownMenu.Trigger class="ml-auto">
                 {#snippet child({ props })}
@@ -177,36 +270,69 @@
                 {#each images as image (image.id)}
                     <Card.Root class="overflow-hidden transition-shadow hover:shadow-md">
                         <Card.Content class="p-0">
-                            <a
-                                href={resolve(`/image/${image.id}`)}
-                                class="relative block aspect-square bg-muted"
-                            >
-                                <img
-                                    src="/raw/images/{image.id}{getExt(
-                                        image.original_name
-                                    )}?width=300"
-                                    alt={image.original_name}
-                                    class="h-full w-full object-cover"
-                                    loading="lazy"
-                                />
-                            </a>
+                            {#if isSelectionMode}
+                                <button
+                                    type="button"
+                                    onclick={() => toggleImageSelection(image.id)}
+                                    class="relative block aspect-square w-full bg-muted"
+                                >
+                                    <img
+                                        src="/raw/images/{image.id}{getExt(
+                                            image.original_name
+                                        )}?width=300"
+                                        alt={image.original_name}
+                                        class="h-full w-full object-cover {selectedImages.has(
+                                            image.id
+                                        )
+                                            ? 'opacity-60'
+                                            : ''}"
+                                        loading="lazy"
+                                    />
+                                    {#if selectedImages.has(image.id)}
+                                        <div
+                                            class="absolute inset-0 flex items-center justify-center bg-primary/20"
+                                        >
+                                            <div
+                                                class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"
+                                            >
+                                                <Check class="h-6 w-6" strokeWidth={3} />
+                                            </div>
+                                        </div>
+                                    {/if}
+                                </button>
+                            {:else}
+                                <a
+                                    href={resolve(`/image/${image.id}`)}
+                                    class="relative block aspect-square bg-muted"
+                                >
+                                    <img
+                                        src="/raw/images/{image.id}{getExt(
+                                            image.original_name
+                                        )}?width=300"
+                                        alt={image.original_name}
+                                        class="h-full w-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </a>
+                            {/if}
                         </Card.Content>
                         <Card.Footer class="flex items-center justify-between p-2">
                             <span
                                 class="max-w-37.5 truncate text-sm font-medium"
                                 title={image.original_name}>{image.original_name}</span
                             >
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onclick={(e) => {
-                                    e.preventDefault();
-                                    deleteFile(image.id);
-                                }}
-                                class="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive/90"
-                            >
-                                <Trash2 class="h-4 w-4" />
-                            </Button>
+                            {#if !isSelectionMode}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onclick={() => {
+                                        deleteFile(image.id);
+                                    }}
+                                    class="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive/90"
+                                >
+                                    <Trash2 class="h-4 w-4" />
+                                </Button>
+                            {/if}
                         </Card.Footer>
                     </Card.Root>
                 {/each}
@@ -217,3 +343,40 @@
         {/if}
     </div>
 </div>
+
+<Sheet.Root bind:open={isCreateAlbumOpen}>
+    <Sheet.Content>
+        <Sheet.Header>
+            <Sheet.Title>Create Album</Sheet.Title>
+            <Sheet.Description>
+                Create a shareable album with {selectedImages.size} selected image{selectedImages.size !==
+                1
+                    ? 's'
+                    : ''}
+            </Sheet.Description>
+        </Sheet.Header>
+        <div class="mt-4 space-y-4 px-4">
+            <div class="space-y-2">
+                <label for="album-name" class="text-sm font-medium">Album Name (Optional)</label>
+                <Input
+                    id="album-name"
+                    bind:value={albumName}
+                    placeholder="My Album"
+                    disabled={isCreatingAlbum}
+                />
+            </div>
+        </div>
+        <Sheet.Footer class="mt-6">
+            <Button
+                variant="outline"
+                onclick={() => (isCreateAlbumOpen = false)}
+                disabled={isCreatingAlbum}
+            >
+                Cancel
+            </Button>
+            <Button onclick={createAlbum} disabled={isCreatingAlbum}>
+                {isCreatingAlbum ? 'Creating...' : 'Create Album'}
+            </Button>
+        </Sheet.Footer>
+    </Sheet.Content>
+</Sheet.Root>
