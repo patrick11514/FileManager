@@ -1,10 +1,10 @@
 <script lang="ts">
     import { API } from '$/lib/api';
-    import { invalidate } from '$app/navigation';
+    import { invalidateAll } from '$app/navigation';
     import { resolve } from '$app/paths';
+    import { Badge } from '$lib/components/ui/badge/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
-    import { Badge } from '$lib/components/ui/badge/index.js';
     import ImageIcon from '@lucide/svelte/icons/image';
     import Link from '@lucide/svelte/icons/link';
     import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -45,7 +45,7 @@
                     }
                     toast.success('Album deleted successfully');
                     // Reload the page data to reflect the deletion
-                    await invalidate(() => true);
+                    await invalidateAll();
                 }
             },
             cancel: {
