@@ -1,4 +1,5 @@
 import { THUMBNAIL_PROMISES, generateThumbnail } from '$/lib/server/thumbnails';
+import { conn } from '$/lib/server/variables';
 import { error } from '@sveltejs/kit';
 import { createReadStream, existsSync } from 'fs';
 import { stat, writeFile } from 'fs/promises';
@@ -116,7 +117,17 @@ export const GET: RequestHandler = async ({ params, url }) => {
     };
 
     if (type === 'file') {
-        headers['Content-Disposition'] = `attachment; filename="${file}"`;
+        const fileRecord = await conn
+            .selectFrom('files')
+            .select(['original_name'])
+            .where('id', '=', uuid)
+            .executeTakeFirst();
+
+        const downloadName = fileRecord?.original_name || file;
+        const safeName = downloadName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+        headers['Content-Disposition'] =
+            `attachment; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(downloadName)}`;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
