@@ -1,9 +1,9 @@
 allowBuilds:
-  '@ffmpeg-installer/linux-x64': true
-  bcrypt: true
-  esbuild: true
-  sharp: true
+    '@ffmpeg-installer/linux-x64': true
+    bcrypt: true
+    esbuild: true
+    sharp: true
 onlyBuiltDependencies:
-  - bcrypt
-  - esbuild
-  - sharp
+    - bcrypt
+    - esbuild
+    - sharp
