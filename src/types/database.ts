@@ -12,6 +12,7 @@ export type Generated<T> =
 
 export interface AlbumImages {
     album_id: string;
+    display_order: Generated<number>;
     file_id: string;
 }
 
@@ -28,6 +29,16 @@ export interface ApiKeys {
     key: string;
     name: string;
     user_id: number;
+}
+
+export interface EditTokens {
+    consumed_at: Generated<Date | null>;
+    created_at: Generated<Date>;
+    created_by: number;
+    expires_at: Date;
+    file_id: string;
+    id: Generated<number>;
+    token_hash: string;
 }
 
 export interface Files {
@@ -62,6 +73,7 @@ export interface DB {
     album_images: AlbumImages;
     albums: Albums;
     api_keys: ApiKeys;
+    edit_tokens: EditTokens;
     files: Files;
     folder_files: FolderFiles;
     folders: Folders;
