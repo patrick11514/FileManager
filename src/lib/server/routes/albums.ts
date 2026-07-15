@@ -55,7 +55,13 @@ export const albumsRouter = {
         // Add images to album
         await conn
             .insertInto('album_images')
-            .values(input.fileIds.map((fileId) => ({ album_id: albumId, file_id: fileId })))
+            .values(
+                input.fileIds.map((fileId, index) => ({
+                    album_id: albumId,
+                    file_id: fileId,
+                    display_order: index
+                }))
+            )
             .execute();
 
         return {
@@ -109,11 +115,24 @@ export const albumsRouter = {
             } satisfies ErrorApiResponse;
         }
 
-        for (const file of files) {
+        const maxOrderResult = await conn
+            .selectFrom('album_images')
+            .select(({ fn }) => fn.max('display_order').as('max_order'))
+            .where('album_id', '=', input.albumId)
+            .executeTakeFirst();
+
+        const maxOrder = Number(maxOrderResult?.max_order ?? -1);
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
             await conn
                 .insertInto('album_images')
                 .ignore()
-                .values({ album_id: input.albumId, file_id: file.id })
+                .values({
+                    album_id: input.albumId,
+                    file_id: file.id,
+                    display_order: maxOrder + i + 1
+                })
                 .execute();
         }
 
@@ -138,8 +157,14 @@ export const albumsRouter = {
         const images = await conn
             .selectFrom('album_images')
             .innerJoin('files', 'files.id', 'album_images.file_id')
-            .select(['files.id', 'files.original_name', 'files.mime_type'])
+            .select([
+                'files.id',
+                'files.original_name',
+                'files.mime_type',
+                'album_images.display_order'
+            ])
             .where('album_images.album_id', '=', input.id)
+            .orderBy('album_images.display_order', 'asc')
             .execute();
 
         return {
@@ -210,5 +235,38 @@ export const albumsRouter = {
         return {
             status: true
         } as const;
+    }),
+    reorder: authProcedure.POST.input(
+        z.object({
+            albumId: z.string(),
+            fileIds: z.array(z.string())
+        })
+    ).query(async ({ input, ctx }) => {
+        const album = await conn
+            .selectFrom('albums')
+            .select(['id', 'created_by'])
+            .where('id', '=', input.albumId)
+            .executeTakeFirst();
+
+        if (!album || album.created_by !== ctx.id) {
+            return {
+                status: false,
+                code: 403,
+                message: 'Album not found or unauthorized'
+            } satisfies ErrorApiResponse;
+        }
+
+        await conn.transaction().execute(async (trx) => {
+            for (let i = 0; i < input.fileIds.length; i++) {
+                await trx
+                    .updateTable('album_images')
+                    .set({ display_order: i })
+                    .where('album_id', '=', input.albumId)
+                    .where('file_id', '=', input.fileIds[i])
+                    .execute();
+            }
+        });
+
+        return { status: true } as const;
     })
 };
