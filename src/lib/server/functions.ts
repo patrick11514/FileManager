@@ -80,6 +80,50 @@ export const uploadFile = async (fd: FormData, user_id: number) => {
         })
         .execute();
 
+    const folderId = fd.get('folderId') as string | null;
+    if (folderId) {
+        const folder = await conn
+            .selectFrom('folders')
+            .select(['id'])
+            .where('id', '=', folderId)
+            .where('created_by', '=', user_id)
+            .executeTakeFirst();
+        if (folder) {
+            await conn
+                .insertInto('folder_files')
+                .ignore()
+                .values({ folder_id: folderId, file_id: id })
+                .execute();
+        }
+    }
+
+    const albumId = fd.get('albumId') as string | null;
+    if (albumId && (type === 'images' || type === 'videos')) {
+        const album = await conn
+            .selectFrom('albums')
+            .select(['id'])
+            .where('id', '=', albumId)
+            .where('created_by', '=', user_id)
+            .executeTakeFirst();
+        if (album) {
+            const maxOrderResult = await conn
+                .selectFrom('album_images')
+                .select(({ fn }) => fn.max('display_order').as('max_order'))
+                .where('album_id', '=', albumId)
+                .executeTakeFirst();
+            const maxOrder = Number(maxOrderResult?.max_order ?? -1);
+            await conn
+                .insertInto('album_images')
+                .ignore()
+                .values({
+                    album_id: albumId,
+                    file_id: id,
+                    display_order: maxOrder + 1
+                })
+                .execute();
+        }
+    }
+
     if (type === 'videos') {
         const promise = generateThumbnail(filename);
         THUMBNAIL_PROMISES[filename] = promise;
@@ -98,6 +142,7 @@ export const uploadFile = async (fd: FormData, user_id: number) => {
         id: id,
         path: filePath,
         url: `/raw/${type}/${filename}`,
-        type
+        type,
+        originalName
     };
 };

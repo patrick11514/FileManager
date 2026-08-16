@@ -19,8 +19,19 @@ export const filesRouter = {
         }
 
         return {
-            status: true
-        } as const;
+            status: true,
+            data: {
+                id: file.id,
+                url: file.url,
+                type: file.type,
+                originalName: file.originalName
+            }
+        } satisfies SuccessApiResponse<{
+            id: string;
+            url: string;
+            type: string;
+            originalName: string;
+        }>;
     }),
     list: authProcedure.POST.input(
         z.object({

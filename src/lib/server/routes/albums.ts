@@ -9,35 +9,37 @@ export const albumsRouter = {
     create: authProcedure.POST.input(
         z.object({
             name: z.string().optional(),
-            fileIds: z.array(z.string()).min(1)
+            fileIds: z.array(z.string()).default([])
         })
     ).query(async ({ input, ctx }) => {
-        // Verify all files exist and belong to images
-        const files = await conn
-            .selectFrom('files')
-            .select(['id', 'mime_type'])
-            .where('id', 'in', input.fileIds)
-            .where('uploaded_by', '=', ctx.id)
-            .execute();
+        if (input.fileIds.length > 0) {
+            // Verify all files exist and belong to images
+            const files = await conn
+                .selectFrom('files')
+                .select(['id', 'mime_type'])
+                .where('id', 'in', input.fileIds)
+                .where('uploaded_by', '=', ctx.id)
+                .execute();
 
-        if (files.length !== input.fileIds.length) {
-            return {
-                status: false,
-                code: 400,
-                message: 'Some files do not exist'
-            } satisfies ErrorApiResponse;
-        }
+            if (files.length !== input.fileIds.length) {
+                return {
+                    status: false,
+                    code: 400,
+                    message: 'Some files do not exist'
+                } satisfies ErrorApiResponse;
+            }
 
-        // Verify all files are images or videos
-        const nonMedia = files.filter(
-            (f) => !f.mime_type.startsWith('image/') && !f.mime_type.startsWith('video/')
-        );
-        if (nonMedia.length > 0) {
-            return {
-                status: false,
-                code: 400,
-                message: 'All files must be images or videos'
-            } satisfies ErrorApiResponse;
+            // Verify all files are images or videos
+            const nonMedia = files.filter(
+                (f) => !f.mime_type.startsWith('image/') && !f.mime_type.startsWith('video/')
+            );
+            if (nonMedia.length > 0) {
+                return {
+                    status: false,
+                    code: 400,
+                    message: 'All files must be images or videos'
+                } satisfies ErrorApiResponse;
+            }
         }
 
         const albumId = uuid();
@@ -52,17 +54,19 @@ export const albumsRouter = {
             })
             .execute();
 
-        // Add images to album
-        await conn
-            .insertInto('album_images')
-            .values(
-                input.fileIds.map((fileId, index) => ({
-                    album_id: albumId,
-                    file_id: fileId,
-                    display_order: index
-                }))
-            )
-            .execute();
+        // Add images to album if any
+        if (input.fileIds.length > 0) {
+            await conn
+                .insertInto('album_images')
+                .values(
+                    input.fileIds.map((fileId, index) => ({
+                        album_id: albumId,
+                        file_id: fileId,
+                        display_order: index
+                    }))
+                )
+                .execute();
+        }
 
         return {
             status: true,
